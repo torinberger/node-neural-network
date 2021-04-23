@@ -24,8 +24,7 @@ function randomWeight() {
 }
 
 function chanceToBool(chance) {
-  let choice = randomInRange(0, 100);
-  return choice <= chance ? true : false;
+  return Math.random() * (100 - 0) + 0 <= chance ? true : false;
 }
 
 const InputNode = function () {
@@ -78,10 +77,15 @@ const Node = function (nOfNodesInPreviousLayer) {
   }
 
   this.updatenOfNodesInPreviousLayer = function (newNodesInPreviousLayer) {
-    if (newNodesInPreviousLayer > this.weights.length) {
-      this.weights.push(randomWeight());
-    } else if(newNodesInPreviousLayer < this.weights.length) {
-      this.weights.pop();
+    let difference = newNodesInPreviousLayer - this.weights.length;
+    if (difference > 0) {
+      for (var i = 0; i < difference; i++) {
+        this.weights.push(randomWeight());
+      }
+    } else if (difference < 0) {
+      for (var i = 0; i < (-difference); i++) {
+        this.weights.pop();
+      }
     }
   }
 
@@ -89,13 +93,9 @@ const Node = function (nOfNodesInPreviousLayer) {
     let increaseWeight = chanceToBool(50);
     let selectWeight = randomInRange(0, this.weights.length - 1);
     if (increaseWeight) {
-      console.log('from', this.weights[selectWeight]);
       this.weights[selectWeight] += weightChange;
-      console.log('to', this.weights[selectWeight]);
     } else {
-      console.log('from', this.weights[selectWeight]);
       this.weights[selectWeight] -= weightChange;
-      console.log('to', this.weights[selectWeight]);
     }
   }
 
@@ -103,7 +103,6 @@ const Node = function (nOfNodesInPreviousLayer) {
 }
 
 const HiddenLayer = function (nOfNodes, nOfNodesInPreviousLayer) {
-  this.nOfNodes = nOfNodes;
   this.nodes = [];
 
   for(let i = 0; i < nOfNodes; i += 1) {
@@ -172,31 +171,31 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
 
   this.mutate = function (layerMutateChance, nodeMutateChance, weightMutateChance, addChance, weightChange) {
     if(chanceToBool(layerMutateChance)) {
-      console.log('Mutating layer');
       let addLayer = chanceToBool(addChance);
       if (addLayer) {
-        console.log('adding');
         this.hiddenLayers.push(new HiddenLayer(nOfHiddenLayerNodes, this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length));
         this.outputLayer.updatenOfNodesInPreviousLayer(nOfHiddenLayerNodes);
       } else {
-        console.log('removing');
-        this.hiddenLayers.pop();
-        this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length);
+        if (this.hiddenLayers.length > 2) {
+          this.hiddenLayers.pop();
+          this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length);
+        }
       }
     } if (chanceToBool(nodeMutateChance)) {
-      console.log('Mutating node');
       let addNode = chanceToBool(addChance);
       if (addNode) {
-        console.log('adding');
         let selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
-        this.hiddenLayers[selectLayer].addNode(this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length);
         if (selectLayer === this.hiddenLayers.length - 1) {
+          this.hiddenLayers[selectLayer].addNode(this.hiddenLayers[selectLayer - 1].nodes.length);
           this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
+        } else if (selectLayer === 0) {
+          this.hiddenLayers[selectLayer].addNode(this.inputLayer.inputNodes.length);
+          this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
         } else {
+          this.hiddenLayers[selectLayer].addNode(this.hiddenLayers[selectLayer - 1].nodes.length);
           this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
         }
       } else {
-        console.log('removing');
         let selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
         if (this.hiddenLayers[selectLayer].nodes.length > 1) {
           this.hiddenLayers[selectLayer].removeNode();
@@ -208,8 +207,6 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
         }
       }
     } if (chanceToBool(weightMutateChance)) {
-      console.log('Mutating weight');
-
       let selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
       let selectNode = randomInRange(0, this.hiddenLayers[selectLayer].nodes.length - 1);
       this.hiddenLayers[selectLayer].nodes[selectNode].mutateWeight(weightChange);
@@ -224,8 +221,21 @@ const testNetwork = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES,
 console.log('--- Propagating Network Layers');
 console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
 console.log(testNetwork.hiddenLayers);
-for (var i = 0; i < 10000; i++) {
-  testNetwork.mutate(0.05, 5, 80, 65, 0.1);
+for (var i = 0; i < 1000000; i++) {
+  testNetwork.mutate(0.005, 0.1, 100, 65, 0.1);
+  let result = testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+  if (i % 100000 === 0) {
+    console.log('WE AT', i);
+    console.log(testNetwork.hiddenLayers);
+    console.log(result);
+  }
+  if (!result) {
+    throw "no Result";
+  }
+  if (!result[0]) {
+    console.log(testNetwork.hiddenLayers);
+    throw NaN;
+  }
 }
 console.log(testNetwork.hiddenLayers);
 console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
