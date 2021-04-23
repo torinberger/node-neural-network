@@ -198,11 +198,13 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
       } else {
         console.log('removing');
         let selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
-        this.hiddenLayers[selectLayer].removeNode();
-        if (selectLayer === this.hiddenLayers.length - 1) {
-          this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-        } else {
-          this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
+        if (this.hiddenLayers[selectLayer].nodes.length > 1) {
+          this.hiddenLayers[selectLayer].removeNode();
+          if (selectLayer === this.hiddenLayers.length - 1) {
+            this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
+          } else {
+            this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
+          }
         }
       }
     } if (chanceToBool(weightMutateChance)) {
@@ -222,6 +224,8 @@ const testNetwork = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES,
 console.log('--- Propagating Network Layers');
 console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
 console.log(testNetwork.hiddenLayers);
-testNetwork.mutate(20, 20, 50, 50, 0.1);
+for (var i = 0; i < 10000; i++) {
+  testNetwork.mutate(0.05, 5, 80, 65, 0.1);
+}
 console.log(testNetwork.hiddenLayers);
 console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
