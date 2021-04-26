@@ -1,7 +1,3 @@
-const NOFINPUTS = 16;
-const NOFHIDDENLAYERS = 2;
-const NOFHIDDENLAYERNODES = 3;
-const NOFOUTPUTS = 4;
 
 function sigmoid(t) {
   return 1/(1+Math.pow(Math.E, -t));
@@ -216,26 +212,4 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
   return this;
 }
 
-const testNetwork = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES, NOFOUTPUTS);
-
-console.log('--- Propagating Network Layers');
-console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
-console.log(testNetwork.hiddenLayers);
-for (var i = 0; i < 1000000; i++) {
-  testNetwork.mutate(0.005, 0.1, 100, 65, 0.1);
-  let result = testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
-  if (i % 100000 === 0) {
-    console.log('WE AT', i);
-    console.log(testNetwork.hiddenLayers);
-    console.log(result);
-  }
-  if (!result) {
-    throw "no Result";
-  }
-  if (!result[0]) {
-    console.log(testNetwork.hiddenLayers);
-    throw NaN;
-  }
-}
-console.log(testNetwork.hiddenLayers);
-console.log(testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]));
+module.exports = Network;

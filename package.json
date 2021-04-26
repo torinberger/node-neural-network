@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/torinberger/node-neural-network/issues"
   },
-  "homepage": "https://github.com/torinberger/node-neural-network#readme"
+  "homepage": "https://github.com/torinberger/node-neural-network#readme",
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.3.2"
+  }
 }
