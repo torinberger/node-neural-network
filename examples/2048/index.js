@@ -1,14 +1,13 @@
 const gameState = new require('./game')();
 
-for (var i = 0; i < 20; i++) {
+let options = ['up', 'right', 'down', 'left'];
+
+for (var i = 0; i < 60; i++) {
   gameState.generate();
-  console.log('before');
   gameState.display();
-  // AI make pick
-  gameState.move('up');
-  console.log('after');
-  gameState.display();
-  if (gameState.checkComplete()) {
+  gameState.move(options[i % 4]);
+  if(gameState.checkComplete()) {
+    console.log(gameState.getScore());
     break;
   }
 }
