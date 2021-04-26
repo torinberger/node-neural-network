@@ -56,6 +56,12 @@ const InputLayer = function (nOfInputs) {
     return this.getNodeValues();
   }
 
+  this.export = function () {
+    return {
+      nodes: this.inputNodes.length,
+    };
+  }
+
   return this;
 }
 
@@ -93,6 +99,12 @@ const Node = function (nOfNodesInPreviousLayer) {
     } else {
       this.weights[selectWeight] -= weightChange;
     }
+  }
+
+  this.export = function () {
+    return {
+      weights: this.weights
+    };
   }
 
   return this;
@@ -134,6 +146,17 @@ const HiddenLayer = function (nOfNodes, nOfNodesInPreviousLayer) {
 
   this.removeNode = function () {
     this.nodes.pop();
+  }
+
+  this.export = function () {
+    let nodesToExport = [];
+    for (var i = 0; i < this.nodes.length; i++) {
+      nodesToExport.push(this.nodes[i].export());
+    }
+
+    return {
+      nodes: nodesToExport,
+    };
   }
 
   return this;
@@ -207,6 +230,18 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
       let selectNode = randomInRange(0, this.hiddenLayers[selectLayer].nodes.length - 1);
       this.hiddenLayers[selectLayer].nodes[selectNode].mutateWeight(weightChange);
     }
+  }
+
+  this.export = function () {
+    let hiddenLayersToExport = [];
+    for (var i = 0; i < this.hiddenLayers.length; i++) {
+      hiddenLayersToExport.push(this.hiddenLayers[i].export());
+    }
+    return JSON.stringify({
+      inputLayer: this.inputLayer.export(),
+      hiddenLayers: hiddenLayersToExport,
+      outputLayer: this.outputLayer.export()
+    });
   }
 
   return this;
