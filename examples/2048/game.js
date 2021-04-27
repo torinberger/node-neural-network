@@ -120,6 +120,7 @@ const GameState = function () {
     }
 
     if (direction === 'up') {
+      // console.log('moving up');
       // progresses down then right
       while (true) {
         let changed = false;
@@ -145,6 +146,7 @@ const GameState = function () {
         }
       }
     } else if (direction === 'right') {
+      // console.log('moving right');
       // progresses left then down
       while (true) {
         let changed = false;
@@ -170,6 +172,7 @@ const GameState = function () {
         }
       }
     }  else if (direction === 'down') {
+      // console.log('moving down');
       // progresses up then right
       while (true) {
         let changed = false;
@@ -195,6 +198,7 @@ const GameState = function () {
         }
       }
     } else if (direction === 'left') {
+      // console.log('moving left');
       // progresses right then down
       while (true) {
         let changed = false;
@@ -244,6 +248,16 @@ const GameState = function () {
       }
       console.log(line);
     }
+  }
+
+  this.export = function () {
+    let gameStateExport = [];
+    for (let i = 0; i < 4; i++) {
+      for (let n = 0; n < 4; n++) {
+        gameStateExport.push(this.gameState[i][n]);
+      }
+    }
+    return gameStateExport;
   }
 
   return this;

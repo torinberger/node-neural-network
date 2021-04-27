@@ -19,6 +19,10 @@ function randomWeight() {
   return Math.random() * (1 - (-1)) + -1;
 }
 
+// function randomWeight() {
+//   return (Math.round((Math.random() * (1 - (-1)) + -1) * 100) / 1000) + 1;
+// }
+
 function chanceToBool(chance) {
   return Math.random() * (100 - 0) + 0 <= chance ? true : false;
 }
@@ -26,7 +30,7 @@ function chanceToBool(chance) {
 const InputNode = function () {
   this.value = null;
   this.propagate = function(input) {
-    this.value = sigmoid(input);
+    // this.value = sigmoid(input);
     return this.value;
   }
 
