@@ -62,6 +62,13 @@ const InputLayer = function (nOfInputs) {
     };
   }
 
+  this.import = function (nOfNodes) {
+    this.inputNodes = [];
+    for(let i = 0; i < nOfNodes; i += 1) {
+      this.inputNodes[i] = new InputNode();
+    }
+  }
+
   return this;
 }
 
@@ -105,6 +112,14 @@ const Node = function (nOfNodesInPreviousLayer) {
     return {
       weights: this.weights
     };
+  }
+
+  this.import = function (weights) {
+    this.weights = [];
+
+    for(let i = 0; i < weights.length; i += 1) {
+      this.weights[i] = weights[i];
+    }
   }
 
   return this;
@@ -157,6 +172,15 @@ const HiddenLayer = function (nOfNodes, nOfNodesInPreviousLayer) {
     return {
       nodes: nodesToExport,
     };
+  }
+
+  this.import = function (nodes) {
+    this.nodes = [];
+
+    for (var i = 0; i < nodes.length; i++) {
+      this.nodes[i] = new Node(0);
+      this.nodes[i].import(nodes[i].weights);
+    }
   }
 
   return this;
@@ -242,6 +266,18 @@ const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOu
       hiddenLayers: hiddenLayersToExport,
       outputLayer: this.outputLayer.export()
     });
+  }
+
+  this.import = function (jsonData) {
+    let importData = JSON.parse(jsonData);
+
+    this.inputLayer.import(importData.inputLayer.nodes);
+    this.hiddenLayers = [];
+    for (var i = 0; i < importData.hiddenLayers.length; i++) {
+      this.hiddenLayers[i] = new HiddenLayer(0, 0);
+      this.hiddenLayers[i].import(importData.hiddenLayers[i].nodes);
+    }
+    this.outputLayer.import(importData.outputLayer.nodes);
   }
 
   return this;
