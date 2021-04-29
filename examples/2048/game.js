@@ -3,6 +3,10 @@ function randomInRange(min, max) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
+function chanceToBool(chance) {
+  return Math.random() * (100 - 0) + 0 <= chance ? true : false;
+}
+
 /*
 
 Gamestate item values:
@@ -95,21 +99,18 @@ const GameState = function () {
   }
 
   this.generate = function () {
-    let count = 0;
-    while (count < 2) {
+    while (true) {
       if (this.checkFull()) {
         return true;
       } else {
         let x = randomInRange(0, 3);
         let y = randomInRange(0, 3);
         if (this.gameState[x][y] === 0) {
-          this.gameState[x][y] = 0.1;
-          count += 1;
+          this.gameState[x][y] = 0.1 + (Number(chanceToBool(25)) * 0.1);
+          return false;
         }
       }
     }
-
-    return false;
   }
 
   this.move = function (direction) {

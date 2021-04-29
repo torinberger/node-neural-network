@@ -8,93 +8,153 @@ const NOFOUTPUTS = 4;
 const network1 = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES, NOFOUTPUTS);
 const network2 = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES, NOFOUTPUTS);
 
-// console.log('--- Mutating Network ---');
-// var start = new Date();
-// for (var i = 0; i < NOFMUTATIONS; i++) {
-//   testNetwork.mutate(0.005, 0.1, 100, 65, 0.1);
-//   if (i % 10000000 === 0) {
-//     var end = new Date();
-//     let ms = end - start;
-//     console.log('10000000 Mutations took', ms, 'ms');
-//     start = new Date();
-//   } else if (i % 1000000 === 0) {
-//     console.log('-- Mutation Loop',i,'--');
-//     let result = testNetwork.propagate([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
-//   }
-// }
+function getGreatestMove(object, array) {
+  let order = array.sort().reverse();
+  for (let property in object) {
+    if (object[property] == order[0]) {
+      return property;
+    }
+  }
+  // if (outputs[0] > outputs[1] && outputs[0] > outputs[2] && outputs[0] > outputs[3]) {
+  //   return 'up';
+  // } else if (outputs[1] > outputs[0] && outputs[1] > outputs[2] && outputs[1] > outputs[3]) {
+  //   return 'right';
+  // } else if (outputs[2] > outputs[1] && outputs[2] > outputs[0] && outputs[2] > outputs[3]) {
+  //   return 'down';
+  // } else if (outputs[3] > outputs[1] && outputs[3] > outputs[2] && outputs[3] > outputs[0]) {
+  //   return 'left';
+  // }
+}
 
-function getGreatestMove(outputs) {
-  if (outputs[0] > outputs[1] && outputs[0] > outputs[2] && outputs[0] > outputs[3]) {
-    return 'up';
-  } else if (outputs[1] > outputs[0] && outputs[1] > outputs[2] && outputs[1] > outputs[3]) {
-    return 'right';
-  } else if (outputs[2] > outputs[1] && outputs[2] > outputs[0] && outputs[2] > outputs[3]) {
-    return 'down';
-  } else if (outputs[3] > outputs[1] && outputs[3] > outputs[2] && outputs[3] > outputs[0]) {
-    return 'left';
+function getSecondGreatestMove(object, array) {
+  let order = array.sort().reverse();
+  for (let property in object) {
+    if (object[property] == order[1]) {
+      return property;
+    }
   }
 }
 
-let savedNet = '';
+function randomInRange(min, max) {
+  return Math.round(Math.random() * (max - min) + min);
+}
 
-while (true) {
+
+let savedNet = '';
+let highscore = 0;
+let i = 0;
+
+while (i < 10000) {
+  i++;
 
   let game1 = new require('./game')();
   while (true) {
     game1.generate();
-    game1.display();
     let network1Output = network1.propagate(game1.export());
-    console.log(network1Output);
-    let move = getGreatestMove(network1Output);
-    // console.log(game1.export());
-    console.log('net1 move');
-    console.log(move, game1.getScore());
-    game1.move(move);
-    if(game1.checkComplete() || game1.checkFull()) {
-      // console.log(game1.getScore());
+    let move = getGreatestMove({
+      up: network1Output[0],
+      right: network1Output[1],
+      down: network1Output[2],
+      left: network1Output[3],
+    }, network1Output);
+    let moveResult = game1.move(move);
+    if (moveResult === false) {
+      move = getSecondGreatestMove({
+        up: network1Output[0],
+        right: network1Output[1],
+        down: network1Output[2],
+        left: network1Output[3],
+      }, network1Output);
+      moveResult = game1.move(move);
+    }
+    if(game1.checkComplete()) {
+      console.log('complete 1');
       break;
     }
   }
   let net1Score = game1.getScore();
+  game1.display();
 
   let game2 = new require('./game')();
-  console.log('new game 2');
-  game2.display();
   while (true) {
     game2.generate();
-    // game2.display();
     let network2Output = network2.propagate(game2.export());
-    console.log(network2Output);
-    let move = getGreatestMove(network2Output);
-    // console.log(game1.export());
-    console.log('net2 move');
-    console.log(move, game2.getScore());
-    game2.move(move);
-    if(game2.checkComplete() || game2.checkFull()) {
-      // console.log(game2.getScore());
+    let move = getGreatestMove({
+      up: network2Output[0],
+      right: network2Output[1],
+      down: network2Output[2],
+      left: network2Output[3],
+    }, network2Output);
+    let moveResult = game2.move(move);
+    if (moveResult === false) {
+      move = getSecondGreatestMove({
+        up: network2Output[0],
+        right: network2Output[1],
+        down: network2Output[2],
+        left: network2Output[3],
+      }, network2Output);
+      moveResult = game2.move(move);
+    }
+    if(game2.checkComplete()) {
+      console.log('complete 2');
       break;
     }
   }
   let net2Score = game2.getScore();
 
-  console.log('scores', net1Score, net2Score);
+  console.log(net1Score, net2Score);
   if (net1Score > net2Score) {
-    console.log('net1 superior');
+    if (net1Score > highscore) {
+      savedNet = network1.export();
+      highscore = net1Score;
+    }
     network2.import(network1.export());
-    network2.mutate(0.005, 80, 100, 65, 0.05);
+    network2.mutate(0.0005, 0.001, 100, 65, 0.1);
   } else if(net2Score > net1Score) {
-    console.log('net2 superior');
+    if (net2Score > highscore) {
+      savedNet = network2.export();
+      highscore = net2Score;
+    }
     network1.import(network2.export());
-    network1.mutate(0.005, 80, 100, 65, 0.05);
+    network1.mutate(0.0005, 0.001, 100, 65, 0.1);
   } else {
     // console.log('neither superior');
-    network1.mutate(0.005, 80, 100, 65, 0.05);
-    network2.mutate(0.005, 80, 100, 65, 0.05);
+    network1.mutate(0.0005, 0.001, 100, 65, 0.1);
+    network2.mutate(0.0005, 0.001, 100, 65, 0.1);
   }
 
 }
 
+console.log('highscore', highscore);
+console.log('network', network1.hiddenLayers);
+console.log('highscore net', JSON.parse(savedNet).hiddenLayers);
 
+highscore = 0;
+for (let i = 0; i < 100000; i++) {
+  const newGame = new require('./game')();
+  while (!newGame.checkComplete()) {
+    newGame.generate();
+    let a = newGame.move({
+      0: 'up',
+      1: 'right',
+      2: 'down',
+      3: 'left'
+    }[randomInRange(0, 3)])
+    if (a === false) {
+      newGame.move({
+        0: 'up',
+        1: 'right',
+        2: 'down',
+        3: 'left'
+      }[randomInRange(0, 3)])
+    }
+  }
+  if (newGame.getScore() > highscore) {
+    highscore = newGame.getScore();
+  }
+}
+
+console.log('chance highscore', highscore);
 // for (var i = 0; i < 60; i++) {
 //   gameState.generate();
 //   gameState.display();

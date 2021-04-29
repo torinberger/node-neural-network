@@ -19,10 +19,6 @@ function randomWeight() {
   return Math.random() * (1 - (-1)) + -1;
 }
 
-// function randomWeight() {
-//   return (Math.round((Math.random() * (1 - (-1)) + -1) * 100) / 1000) + 1;
-// }
-
 function chanceToBool(chance) {
   return Math.random() * (100 - 0) + 0 <= chance ? true : false;
 }
@@ -30,7 +26,7 @@ function chanceToBool(chance) {
 const InputNode = function () {
   this.value = null;
   this.propagate = function(input) {
-    // this.value = sigmoid(input);
+    this.value = input;
     return this.value;
   }
 
@@ -53,7 +49,7 @@ const InputLayer = function (nOfInputs) {
   }
 
   this.propagate = function (inputs) {
-    for(let i = 0; i < inputs.length; i+= 1) {
+    for(let i = 0; i < inputs.length; i += 1) {
       this.inputNodes[i].propagate(inputs[i]);
     }
 
@@ -80,7 +76,7 @@ const Node = function (nOfNodesInPreviousLayer) {
   this.weights = [];
   this.value = null;
 
-  for(let i = 0; i <= nOfNodesInPreviousLayer; i += 1) {
+  for(let i = 0; i < nOfNodesInPreviousLayer; i += 1) {
     this.weights[i] = randomWeight();
   }
 
