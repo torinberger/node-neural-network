@@ -1,14 +1,8 @@
 
+const Mathjs = require('mathjs');
+
 function sigmoid(t) {
   return 1/(1+Math.pow(Math.E, -t));
-}
-
-function sumWithWeighs(inputs, weights) {
-  let count = 0;
-  for(let i = 0; i < inputs.length; i++) {
-    count += inputs[i] * weights[i];
-  }
-  return count;
 }
 
 function randomInRange(min, max) {
@@ -23,50 +17,9 @@ function chanceToBool(chance) {
   return Math.random() * (100 - 0) + 0 <= chance ? true : false;
 }
 
-const InputNode = function () {
-  this.value = null;
-  this.propagate = function(input) {
-    this.value = input;
-    return this.value;
-  }
-
-  return this;
-}
-
-const InputLayer = function (nOfInputs) {
-  this.inputNodes = [];
-  for(let i = 0; i < nOfInputs; i += 1) {
-    this.inputNodes[i] = new InputNode();
-  }
-
-  this.getNodeValues = function () {
-    let values = [];
-    for (var i = 0; i < this.inputNodes.length; i++) {
-      values[i] = this.inputNodes[i].value;
-    }
-
-    return values;
-  }
-
-  this.propagate = function (inputs) {
-    for(let i = 0; i < inputs.length; i += 1) {
-      this.inputNodes[i].propagate(inputs[i]);
-    }
-
-    return this.getNodeValues();
-  }
-
-  this.export = function () {
-    return {
-      nodes: this.inputNodes.length,
-    };
-  }
-
-  this.import = function (nOfNodes) {
-    this.inputNodes = [];
-    for(let i = 0; i < nOfNodes; i += 1) {
-      this.inputNodes[i] = new InputNode();
-    }
+const InputLayer = function () {
+  this.forwardPropagate = function (inputs) {
+    return inputs; // return inputs as outputs
   }
 
   return this;
@@ -74,33 +27,27 @@ const InputLayer = function (nOfInputs) {
 
 const Node = function (nOfNodesInPreviousLayer) {
   this.weights = [];
-  this.value = null;
+  this.bias = 0;
 
-  for(let i = 0; i < nOfNodesInPreviousLayer; i += 1) {
-    this.weights[i] = randomWeight();
-  }
-
-  this.propagate = function (inputs) {
-    this.value = sigmoid(sumWithWeighs(inputs, this.weights));
-    return this.value;
-  }
-
-  this.updatenOfNodesInPreviousLayer = function (newNodesInPreviousLayer) {
-    let difference = newNodesInPreviousLayer - this.weights.length;
-    if (difference > 0) {
-      for (var i = 0; i < difference; i++) {
-        this.weights.push(randomWeight());
-      }
-    } else if (difference < 0) {
-      for (var i = 0; i < (-difference); i++) {
-        this.weights.pop();
-      }
+  this.init = function (nOfNodesInPreviousLayer, customWeights, customBias) {
+    // set bias to custom value if required otherwise set to random value
+    this.bias = customBias !== undefined ? customBias : randomWeight();
+    for(let i = 0; i < nOfNodesInPreviousLayer; i += 1) {
+      // add weight equal to custom weights provided or a randomly generated weight
+      this.weights[i] = customWeights !== undefined ? customWeights[i] : randomWeight();
     }
+
+    return this;
+  }
+
+  this.forwardPropagate = function (inputs) {
+    // multiply weights by inputs, add bias and sigmoid the sum, return as output
+    return sigmoid(Mathjs.multiply(this.weights, inputs) + this.bias);
   }
 
   this.mutateWeight = function (weightChange) {
-    let increaseWeight = chanceToBool(50);
-    let selectWeight = randomInRange(0, this.weights.length - 1);
+    let increaseWeight = chanceToBool(50); // 50% chance to increase/decrease weight
+    let selectWeight = randomInRange(0, this.weights.length - 1); // select random weight
     if (increaseWeight) {
       this.weights[selectWeight] += weightChange;
     } else {
@@ -109,87 +56,53 @@ const Node = function (nOfNodesInPreviousLayer) {
   }
 
   this.export = function () {
-    return {
-      weights: this.weights
+    return { // export object to be JSONified for storage
+      weights: this.weights,
+      bias: this.bias,
     };
-  }
-
-  this.import = function (weights) {
-    this.weights = [];
-
-    for(let i = 0; i < weights.length; i += 1) {
-      this.weights[i] = weights[i];
-    }
   }
 
   return this;
 }
 
-const HiddenLayer = function (nOfNodes, nOfNodesInPreviousLayer) {
+const HiddenLayer = function () {
   this.nodes = [];
 
-  for(let i = 0; i < nOfNodes; i += 1) {
-    this.nodes[i] = new Node(nOfNodesInPreviousLayer);
-  }
-
-  this.getNodeValues = function () {
-    let values = [];
-    for (var i = 0; i < this.nodes.length; i++) {
-      values[i] = this.nodes[i].value;
+  this.init = function (nOfNodes, nOfNodesInPreviousLayer, customNodeWeights, customNodeBiases) {
+    for(let i = 0; i < nOfNodes; i += 1) {
+      // create nodes and provide custom data if needed
+      this.nodes[i] = new Node().init(nOfNodesInPreviousLayer, customNodeWeights[i], customNodeBiases[i]);
     }
 
-    return values;
+    return this;
   }
 
-  this.propagate = function(inputs) {
+  this.forwardPropagate = function(inputs) {
+    let nodeOutputs = [];
     for(let i = 0; i < this.nodes.length; i += 1) {
-      this.nodes[i].propagate(inputs);
+      nodeOutputs[i] = nodes[i].forwardPropagate(inputs); // forward propagate each node and store their value
     }
-
-    return this.getNodeValues();
-  }
-
-  this.updatenOfNodesInPreviousLayer = function (newNodesInPreviousLayer) {
-    for(let i = 0; i < this.nodes.length; i += 1) {
-      this.nodes[i].updatenOfNodesInPreviousLayer(newNodesInPreviousLayer);
-    }
-  }
-
-  this.addNode = function (nOfNodesInPreviousLayer) {
-    this.nodes.push(new Node(nOfNodesInPreviousLayer));
-  }
-
-  this.removeNode = function () {
-    this.nodes.pop();
+    return nodeOutputs; // return node outputs
   }
 
   this.export = function () {
     let nodesToExport = [];
     for (var i = 0; i < this.nodes.length; i++) {
-      nodesToExport.push(this.nodes[i].export());
+      nodesToExport.push(this.nodes[i].export()); // export each node and store
     }
 
     return {
-      nodes: nodesToExport,
+      nodes: nodesToExport, // return all nodes with weights and biases
     };
-  }
-
-  this.import = function (nodes) {
-    this.nodes = [];
-
-    for (var i = 0; i < nodes.length; i++) {
-      this.nodes[i] = new Node(0);
-      this.nodes[i].import(nodes[i].weights);
-    }
   }
 
   return this;
 }
 
 const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOutputNodes) {
-  this.inputLayer = new InputLayer(nOfInputs);
+  this.inputLayer = new InputLayer();
   this.hiddenLayers = [];
-  this.outputLayer = new HiddenLayer(nOfOutputNodes, nOfHiddenLayerNodes);
+  this.outputLayer = new HiddenLayer().init(nOfOutputNodes, nOfHiddenLayerNodes[nOfHiddenLayers - 1]);
 
   for (var i = 0; i < nOfHiddenLayers; i++) {
     if (i === 0) { // if first hidden layer, use input layer as previous layer
