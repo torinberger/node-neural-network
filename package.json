@@ -4,7 +4,7 @@
   "description": "Simple neural network in nodejs.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha",
+    "test": "node ./node_modules/mocha/bin/mocha",
     "lint": "eslint ./index.js"
   },
   "repository": {

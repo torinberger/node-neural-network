@@ -9,8 +9,8 @@ const network1 = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES, NO
 const network2 = new Network(NOFINPUTS, NOFHIDDENLAYERS, NOFHIDDENLAYERNODES, NOFOUTPUTS);
 
 function getGreatestMove(object, array) {
-  let order = array.sort().reverse();
-  for (let property in object) {
+  const order = array.sort().reverse();
+  for (const property in object) {
     if (object[property] == order[0]) {
       return property;
     }
@@ -27,8 +27,8 @@ function getGreatestMove(object, array) {
 }
 
 function getSecondGreatestMove(object, array) {
-  let order = array.sort().reverse();
-  for (let property in object) {
+  const order = array.sort().reverse();
+  for (const property in object) {
     if (object[property] == order[1]) {
       return property;
     }
@@ -39,7 +39,6 @@ function randomInRange(min, max) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
-
 let savedNet = '';
 let highscore = 0;
 let i = 0;
@@ -47,10 +46,10 @@ let i = 0;
 while (i < 10000) {
   i++;
 
-  let game1 = new require('./game')();
+  const game1 = new require('./game')();
   while (true) {
     game1.generate();
-    let network1Output = network1.propagate(game1.export());
+    const network1Output = network1.propagate(game1.export());
     let move = getGreatestMove({
       up: network1Output[0],
       right: network1Output[1],
@@ -67,18 +66,18 @@ while (i < 10000) {
       }, network1Output);
       moveResult = game1.move(move);
     }
-    if(game1.checkComplete()) {
+    if (game1.checkComplete()) {
       console.log('complete 1');
       break;
     }
   }
-  let net1Score = game1.getScore();
+  const net1Score = game1.getScore();
   game1.display();
 
-  let game2 = new require('./game')();
+  const game2 = new require('./game')();
   while (true) {
     game2.generate();
-    let network2Output = network2.propagate(game2.export());
+    const network2Output = network2.propagate(game2.export());
     let move = getGreatestMove({
       up: network2Output[0],
       right: network2Output[1],
@@ -95,12 +94,12 @@ while (i < 10000) {
       }, network2Output);
       moveResult = game2.move(move);
     }
-    if(game2.checkComplete()) {
+    if (game2.checkComplete()) {
       console.log('complete 2');
       break;
     }
   }
-  let net2Score = game2.getScore();
+  const net2Score = game2.getScore();
 
   console.log(net1Score, net2Score);
   if (net1Score > net2Score) {
@@ -110,7 +109,7 @@ while (i < 10000) {
     }
     network2.import(network1.export());
     network2.mutate(0.0005, 0.001, 100, 65, 0.1);
-  } else if(net2Score > net1Score) {
+  } else if (net2Score > net1Score) {
     if (net2Score > highscore) {
       savedNet = network2.export();
       highscore = net2Score;
@@ -122,7 +121,6 @@ while (i < 10000) {
     network1.mutate(0.0005, 0.001, 100, 65, 0.1);
     network2.mutate(0.0005, 0.001, 100, 65, 0.1);
   }
-
 }
 
 console.log('highscore', highscore);
@@ -134,19 +132,19 @@ for (let i = 0; i < 100000; i++) {
   const newGame = new require('./game')();
   while (!newGame.checkComplete()) {
     newGame.generate();
-    let a = newGame.move({
+    const a = newGame.move({
       0: 'up',
       1: 'right',
       2: 'down',
-      3: 'left'
-    }[randomInRange(0, 3)])
+      3: 'left',
+    }[randomInRange(0, 3)]);
     if (a === false) {
       newGame.move({
         0: 'up',
         1: 'right',
         2: 'down',
-        3: 'left'
-      }[randomInRange(0, 3)])
+        3: 'left',
+      }[randomInRange(0, 3)]);
     }
   }
   if (newGame.getScore() > highscore) {
