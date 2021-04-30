@@ -1,51 +1,63 @@
 const Mathjs = require('mathjs');
 
 function sigmoid(t) {
-  return 1 / (1 + Math.E**(-t));
+  return 1 / (1 + Math.E ** (-t));
 }
 
-function randomInRange(min, max) {
-  return Math.round(Math.random() * (max - min) + min);
-}
+// function randomInRange(min, max) {
+//   return Math.round(Math.random() * (max - min) + min);
+// }
 
 function randomWeight() {
   return Math.random() * (1 - (-1)) + -1;
 }
 
-function chanceToBool(chance) {
-  return Math.random() * (100 - 0) + 0 <= chance;
-}
+// function chanceToBool(chance) {
+//   return Math.random() * (100 - 0) + 0 <= chance;
+// }
 
-const InputLayer = function () {
-  this.forwardPropagate = function (inputs) {
+const InputLayer = function InputLayer() {
+  this.nOfInputs = null; // store number of inputs for exporting
+
+  this.init = function init(nOfInputs) {
+    this.nOfInputs = nOfInputs; // set number of inputs
+    return this;
+  };
+
+  this.forwardPropagate = function forwardPropagate(inputs) {
     return inputs; // return inputs as outputs
+  };
+
+  this.exportLayer = function exportLayer() {
+    return {
+      nOfInputs: this.nOfInputs,
+    };
   };
 
   return this;
 };
 
-const Node = function (nOfNodesInPreviousLayer) {
+const Node = function Node() {
   this.weights = [];
   this.bias = 0;
 
-  this.init = function (nOfNodesInPreviousLayer, customWeights, customBias) {
+  this.init = function init(nOfNodesInPreviousLayer) {
     this.weights = [];
-    // set bias to custom value if required otherwise set to random value
-    this.bias = customBias !== undefined ? customBias : randomWeight();
+    this.bias = randomWeight();
+    // create weight for each node in previous layer
     for (let i = 0; i < nOfNodesInPreviousLayer; i += 1) {
-      // add weight equal to custom weights provided or a randomly generated weight
-      this.weights[i] = customWeights !== undefined ? customWeights[i] : randomWeight();
+      this.weights[i] = randomWeight();
     }
 
     return this;
   };
 
-  this.forwardPropagate = function (inputs) {
+  this.forwardPropagate = function forwardPropagate(inputs) {
     // multiply weights by inputs, add bias and sigmoid the sum, return as output
     return sigmoid(Mathjs.multiply(this.weights, inputs) + this.bias);
   };
 
-  this.export = function () {
+  this.exportNode = function exportNode() {
     return { // export object to be JSONified for storage
       weights: this.weights,
       bias: this.bias,
@@ -55,31 +67,34 @@ const Node = function (nOfNodesInPreviousLayer) {
   return this;
 };
 
-const HiddenLayer = function () {
+const HiddenLayer = function HiddenLayer() {
   this.nodes = [];
 
-  this.init = function (nOfNodes, nOfNodesInPreviousLayer, customNodeWeights, customNodeBiases) {
+  this.init = function init(nOfNodes, nOfNodesInPreviousLayer) {
     this.nodes = [];
     for (let i = 0; i < nOfNodes; i += 1) {
       // create nodes and provide custom data if needed
-      this.nodes[i] = new Node().init(nOfNodesInPreviousLayer, customNodeWeights[i], customNodeBiases[i]);
+      this.nodes[i] = new Node().init(nOfNodesInPreviousLayer);
     }
 
     return this;
   };
 
-  this.forwardPropagate = function (inputs) {
+  this.forwardPropagate = function forwardPropagate(inputs) {
     const nodeOutputs = [];
     for (let i = 0; i < this.nodes.length; i += 1) {
-      nodeOutputs[i] = nodes[i].forwardPropagate(inputs); // forward propagate each node and store their value
+      // forward propagate each node and store their value
+      nodeOutputs[i] = this.nodes[i].forwardPropagate(inputs);
     }
+
     return nodeOutputs; // return node outputs
   };
 
-  this.export = function () {
+  this.exportLayer = function exportLayer() {
     const nodesToExport = [];
-    for (let i = 0; i < this.nodes.length; i++) {
-      nodesToExport.push(this.nodes[i].export()); // export each node and store
+    for (let i = 0; i < this.nodes.length; i += 1) {
+      // export each node and store
+      nodesToExport.push(this.nodes[i].export());
     }
 
     return {
@@ -90,96 +105,59 @@ const HiddenLayer = function () {
   return this;
 };
 
-const Network = function (nOfInputs, nOfHiddenLayers, nOfHiddenLayerNodes, nOfOutputNodes) {
-  this.inputLayer = new InputLayer();
+const Network = function Network() {
+  this.inputLayer = null;
   this.hiddenLayers = [];
-  this.outputLayer = new HiddenLayer().init(nOfOutputNodes, nOfHiddenLayerNodes[nOfHiddenLayers - 1]);
+  this.outputLayer = null;
 
-  for (let i = 0; i < nOfHiddenLayers; i++) {
-    if (i === 0) { // if first hidden layer, use input layer as previous layer
-      this.hiddenLayers[i] = new HiddenLayer(nOfHiddenLayerNodes, nOfInputs);
-    } else { // if not first hidden layer, use last hidden layer as previous layer
-      this.hiddenLayers[i] = new HiddenLayer(nOfHiddenLayerNodes, this.hiddenLayers[i - 1].nodes.length);
-    }
-  }
+  this.init = function init(nOfInputs, nOfHiddenLayerNodes, nOfOutputs) {
+    this.inputLayer = new InputLayer().init(nOfInputs);
 
-  this.propagate = function (inputs) {
-    const inputLayerValues = this.inputLayer.propagate(inputs);
-    for (let i = 0; i < this.hiddenLayers.length; i++) {
-      if (i === 0) { // if first hidden layer
-        this.hiddenLayers[i].propagate(inputLayerValues);
-      } else {
-        this.hiddenLayers[i].propagate(this.hiddenLayers[i - 1].getNodeValues());
+    for (let i = 0; i < nOfHiddenLayerNodes.length; i += 1) {
+      if (i === 0) { // if first hidden layer, use input layer as previous layer
+        this.hiddenLayers[i] = new HiddenLayer();
+        this.hiddenLayers[i].init(nOfHiddenLayerNodes[i], nOfInputs);
+      } else { // if not first hidden layer, use last hidden layer as previous layer
+        this.hiddenLayers[i] = new HiddenLayer();
+        this.hiddenLayers[i].init(nOfHiddenLayerNodes[i], nOfHiddenLayerNodes[i - 1]);
       }
     }
-    const outputLayerValues = this.outputLayer.propagate(this.hiddenLayers[this.hiddenLayers.length - 1].getNodeValues());
-    return outputLayerValues;
+
+    this.outputLayer = new HiddenLayer();
+    this.outputLayer.init(nOfOutputs, nOfHiddenLayerNodes[nOfHiddenLayerNodes.length - 1]);
+
+    return this;
   };
 
-  this.mutate = function (layerMutateChance, nodeMutateChance, weightMutateChance, addChance, weightChange) {
-    if (chanceToBool(layerMutateChance)) {
-      const addLayer = chanceToBool(addChance);
-      if (addLayer) {
-        this.hiddenLayers.push(new HiddenLayer(nOfHiddenLayerNodes, this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length));
-        this.outputLayer.updatenOfNodesInPreviousLayer(nOfHiddenLayerNodes);
-      } else if (this.hiddenLayers.length > 2) {
-        this.hiddenLayers.pop();
-        this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[this.hiddenLayers.length - 1].nodes.length);
-      }
-    } if (chanceToBool(nodeMutateChance)) {
-      const addNode = chanceToBool(addChance);
-      if (addNode) {
-        const selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
-        if (selectLayer === this.hiddenLayers.length - 1) {
-          this.hiddenLayers[selectLayer].addNode(this.hiddenLayers[selectLayer - 1].nodes.length);
-          this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-        } else if (selectLayer === 0) {
-          this.hiddenLayers[selectLayer].addNode(this.inputLayer.inputNodes.length);
-          this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-        } else {
-          this.hiddenLayers[selectLayer].addNode(this.hiddenLayers[selectLayer - 1].nodes.length);
-          this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-        }
+  this.forwardPropagate = function forwardPropagate(inputs) {
+    const inputLayerValues = this.inputLayer.forwardPropagate(inputs);
+    let lastLayerValues = [];
+
+    for (let i = 0; i < this.hiddenLayers.length; i += 1) {
+      if (i === 0) { // if first hidden layer, propagate from inputs
+        lastLayerValues = this.hiddenLayers[i].forwardPropagate(inputLayerValues);
       } else {
-        const selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
-        if (this.hiddenLayers[selectLayer].nodes.length > 1) {
-          this.hiddenLayers[selectLayer].removeNode();
-          if (selectLayer === this.hiddenLayers.length - 1) {
-            this.outputLayer.updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-          } else {
-            this.hiddenLayers[selectLayer + 1].updatenOfNodesInPreviousLayer(this.hiddenLayers[selectLayer].nodes.length);
-          }
-        }
+        this.hiddenLayers[i].forwardPropagate(lastLayerValues);
       }
-    } if (chanceToBool(weightMutateChance)) {
-      const selectLayer = randomInRange(0, this.hiddenLayers.length - 1);
-      const selectNode = randomInRange(0, this.hiddenLayers[selectLayer].nodes.length - 1);
-      this.hiddenLayers[selectLayer].nodes[selectNode].mutateWeight(weightChange);
     }
+
+    return this.outputLayer.forwardPropagate(lastLayerValues);
   };
 
-  this.export = function () {
+  this.exportNetwork = function exportNetwork() {
     const hiddenLayersToExport = [];
-    for (let i = 0; i < this.hiddenLayers.length; i++) {
+
+    for (let i = 0; i < this.hiddenLayers.length; i += 1) {
+      // store each layers export values
       hiddenLayersToExport.push(this.hiddenLayers[i].export());
     }
+
+    // return JSON stringified object
     return JSON.stringify({
       inputLayer: this.inputLayer.export(),
       hiddenLayers: hiddenLayersToExport,
       outputLayer: this.outputLayer.export(),
     });
-  };
-
-  this.import = function (jsonData) {
-    const importData = JSON.parse(jsonData);
-
-    this.inputLayer.import(importData.inputLayer.nodes);
-    this.hiddenLayers = [];
-    for (let i = 0; i < importData.hiddenLayers.length; i++) {
-      this.hiddenLayers[i] = new HiddenLayer(0, 0);
-      this.hiddenLayers[i].import(importData.hiddenLayers[i].nodes);
-    }
-    this.outputLayer.import(importData.outputLayer.nodes);
   };
 
   return this;
