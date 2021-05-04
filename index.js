@@ -123,6 +123,7 @@ const Network = function Network() {
       }
     }
 
+    // create output layer as another hidden layer
     this.outputLayer = new HiddenLayer();
     this.outputLayer.init(nOfOutputs, nOfHiddenLayerNodes[nOfHiddenLayerNodes.length - 1]);
 
@@ -137,7 +138,7 @@ const Network = function Network() {
       if (i === 0) { // if first hidden layer, propagate from inputs
         lastLayerValues = this.hiddenLayers[i].forwardPropagate(inputLayerValues);
       } else {
-        this.hiddenLayers[i].forwardPropagate(lastLayerValues);
+        lastLayerValues = this.hiddenLayers[i].forwardPropagate(lastLayerValues);
       }
     }
 

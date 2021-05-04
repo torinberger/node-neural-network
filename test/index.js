@@ -36,15 +36,17 @@ describe('Network', () => {
   });
 
   describe('Forward Propagation', () => {
-    let nn = new NeuralNetwork().init(3, [2, 3], 1);
+    let nn = new NeuralNetwork().init(3, [2, 3], 2);
     let forwardPropagation = nn.forwardPropagate([10, 5, -6]);
+    console.log(forwardPropagation);
     it('it should return an array', (done) => {
       forwardPropagation.should.be.an('array');
-      forwardPropagation.should.be.of.length(1);
+      forwardPropagation.should.be.of.length(2);
       done();
     });
     it('it should return an array of number', (done) => {
-      forwardPropagation.members.should.be('number');
+      forwardPropagation[0].should.be.a('number');
+      forwardPropagation[1].should.be.a('number');
       done();
     });
   });
