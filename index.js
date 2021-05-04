@@ -25,7 +25,15 @@ const InputLayer = function InputLayer() {
   };
 
   this.forwardPropagate = function forwardPropagate(inputs) {
-    return inputs; // return inputs as outputs
+    if (inputs.length !== this.nOfInputs) {
+      throw new Error('Incorrect input length');
+    } else {
+      return inputs; // return inputs as outputs
+    }
+  };
+
+  this.importLayer = function importLayer(newInputLayer) {
+    this.nOfInputs = newInputLayer.nOfInputs;
   };
 
   this.exportLayer = function exportLayer() {
@@ -55,6 +63,11 @@ const Node = function Node() {
   this.forwardPropagate = function forwardPropagate(inputs) {
     // multiply weights by inputs, add bias and sigmoid the sum, return as output
     return sigmoid(Mathjs.multiply(this.weights, inputs) + this.bias);
+  };
+
+  this.importNode = function importNode(newNode) {
+    this.bias = newNode.bias;
+    this.weights = newNode.weights;
   };
 
   this.exportNode = function exportNode() {
@@ -90,11 +103,19 @@ const HiddenLayer = function HiddenLayer() {
     return nodeOutputs; // return node outputs
   };
 
+  this.importLayer = function importLayer(newHiddenLayer, nOfNodesInPreviousLayer) {
+    this.nodes = [];
+    for (let i = 0; i < newHiddenLayer.nodes.length; i += 1) {
+      this.nodes[i] = new Node();
+      this.nodes[i].importNode(newHiddenLayer.nodes[i], nOfNodesInPreviousLayer);
+    }
+  };
+
   this.exportLayer = function exportLayer() {
     const nodesToExport = [];
     for (let i = 0; i < this.nodes.length; i += 1) {
       // export each node and store
-      nodesToExport.push(this.nodes[i].export());
+      nodesToExport.push(this.nodes[i].exportNode());
     }
 
     return {
@@ -145,19 +166,40 @@ const Network = function Network() {
     return this.outputLayer.forwardPropagate(lastLayerValues);
   };
 
+  this.importNetwork = function importNetwork(newNetwork) {
+    this.inputLayer = new InputLayer();
+    this.inputLayer.importLayer(newNetwork.inputLayer);
+
+    this.hiddenLayers = []; // incase network has been initialized previously
+    for (let i = 0; i < newNetwork.hiddenLayers.length; i += 1) {
+      this.hiddenLayers[i] = new HiddenLayer();
+      if (i === 0) {
+        const nOfNodesInPreviousLayer = newNetwork.inputLayer.nOfInputs;
+        this.hiddenLayers[i].importLayer(newNetwork.hiddenLayers[i], nOfNodesInPreviousLayer);
+      } else {
+        const nOfNodesInPreviousLayer = newNetwork.hiddenLayers[i - 1].nodes.length;
+        this.hiddenLayers[i].importLayer(newNetwork.hiddenLayers[i], nOfNodesInPreviousLayer);
+      }
+    }
+
+    const nOfNodesInPreviousLayer = newNetwork.hiddenLayers.slice(-1)[0].nodes.length;
+    this.outputLayer = new HiddenLayer();
+    this.outputLayer.importLayer(newNetwork.outputLayer, nOfNodesInPreviousLayer);
+  };
+
   this.exportNetwork = function exportNetwork() {
     const hiddenLayersToExport = [];
 
     for (let i = 0; i < this.hiddenLayers.length; i += 1) {
       // store each layers export values
-      hiddenLayersToExport.push(this.hiddenLayers[i].export());
+      hiddenLayersToExport.push(this.hiddenLayers[i].exportLayer());
     }
 
     // return JSON stringified object
     return JSON.stringify({
-      inputLayer: this.inputLayer.export(),
+      inputLayer: this.inputLayer.exportLayer(),
       hiddenLayers: hiddenLayersToExport,
-      outputLayer: this.outputLayer.export(),
+      outputLayer: this.outputLayer.exportLayer(),
     });
   };
 
