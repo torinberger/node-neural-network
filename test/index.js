@@ -4,7 +4,7 @@
 process.env.NODE_ENV = 'test';
 
 const chai = require('chai');
-const NeuralNetwork = require('../index');
+const NeuralNetwork = require('../src');
 
 const should = chai.should(); // eslint-disable-line
 
