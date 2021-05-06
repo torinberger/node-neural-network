@@ -1,5 +1,5 @@
 const Mathjs = require('mathjs');
-const netUtil = require('./netUtil');
+const netUtil = require('../netUtil');
 
 /**
  * Node Constructor

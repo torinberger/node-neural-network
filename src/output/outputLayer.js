@@ -1,4 +1,4 @@
-const OutputNode = require('./node');
+const OutputNode = require('./outputNode');
 
 /**
  * Output Layer Constructor

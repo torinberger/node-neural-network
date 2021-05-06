@@ -1,6 +1,6 @@
-const InputLayer = require('./inputLayer');
-const HiddenLayer = require('./hiddenLayer');
-const OutputLayer = require('./outputLayer');
+const InputLayer = require('./input/inputLayer');
+const HiddenLayer = require('./hidden/hiddenLayer');
+const OutputLayer = require('./output/outputLayer');
 
 /**
  * Network constructor

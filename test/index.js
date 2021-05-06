@@ -52,37 +52,37 @@ describe('Network', () => {
     });
   });
 
-  // describe('Exporting & Importing', () => {
-  //   const nn1 = new NeuralNetwork().init(3, [2, 3], 2);
-  //   const nn2 = new NeuralNetwork().init(3, [3], 2);
-  //   const forwardPropagation1 = nn1.forwardPropagate([10, 5, -6]);
-  //   const forwardPropagation2 = nn2.forwardPropagate([10, 5, -6]);
-  //
-  //   it('neural networks should not share the same output', (done) => {
-  //     forwardPropagation1.should.not.deep.equal(forwardPropagation2);
-  //     done();
-  //   });
-  //   it('neural networks should export a string', (done) => {
-  //     nn1.exportNetwork().should.be.a('string');
-  //     nn2.exportNetwork().should.be.a('string');
-  //     done();
-  //   });
-  //   it('neural networks should export a parseable object', (done) => {
-  //     JSON.parse(nn1.exportNetwork()).should.be.an('object');
-  //     JSON.parse(nn2.exportNetwork()).should.be.an('object');
-  //     done();
-  //   });
-  //   it('neural networks should import parsed exports', (done) => {
-  //     const nn1Export = JSON.parse(nn1.exportNetwork());
-  //     nn2.importNetwork(nn1Export);
-  //     nn2.inputLayer.inputNodes.length.should.equal(nn1.inputLayer.inputNodes.length);
-  //     nn2.hiddenLayers.length.should.equal(nn1.hiddenLayers.length);
-  //     nn2.outputLayer.nodes.length.should.equal(nn1.outputLayer.nodes.length);
-  //     done();
-  //   });
-  //   it('equal neural networks should share the same output with the same inputs', (done) => {
-  //     nn2.forwardPropagate([10, 5, -6]).should.deep.equal(forwardPropagation1);
-  //     done();
-  //   });
-  // });
+  describe('Exporting & Importing', () => {
+    const nn1 = new NeuralNetwork().init(3, [2, 3], 2);
+    const nn2 = new NeuralNetwork().init(3, [3], 2);
+    const forwardPropagation1 = nn1.forwardPropagate([10, 5, -6]);
+    const forwardPropagation2 = nn2.forwardPropagate([10, 5, -6]);
+
+    it('neural networks should not share the same output', (done) => {
+      forwardPropagation1.should.not.deep.equal(forwardPropagation2);
+      done();
+    });
+    it('neural networks should export a string', (done) => {
+      nn1.exportNetwork().should.be.a('string');
+      nn2.exportNetwork().should.be.a('string');
+      done();
+    });
+    it('neural networks should export a parseable object', (done) => {
+      JSON.parse(nn1.exportNetwork()).should.be.an('object');
+      JSON.parse(nn2.exportNetwork()).should.be.an('object');
+      done();
+    });
+    it('neural networks should import parsed exports', (done) => {
+      const nn1Export = JSON.parse(nn1.exportNetwork());
+      nn2.importNetwork(nn1Export);
+      nn2.inputLayer.inputNodes.length.should.equal(nn1.inputLayer.inputNodes.length);
+      nn2.hiddenLayers.length.should.equal(nn1.hiddenLayers.length);
+      nn2.outputLayer.outputNodes.length.should.equal(nn1.outputLayer.outputNodes.length);
+      done();
+    });
+    it('equal neural networks should share the same output with the same inputs', (done) => {
+      nn2.forwardPropagate([10, 5, -6]).should.deep.equal(forwardPropagation1);
+      done();
+    });
+  });
 });
