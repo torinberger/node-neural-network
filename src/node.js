@@ -2,7 +2,7 @@ const Mathjs = require('mathjs');
 const netUtil = require('./netUtil');
 
 /**
- * Node constructor
+ * Node Constructor
  * Holds weights, bias and propagation functions.
  *
  * @property {Number[]} weights
@@ -66,7 +66,7 @@ const Node = function Node() {
    * Export Node
    * Converts node weights and bias to JSON string.
    *
-   * @return {String} exportedNode
+   * @return {Object}
    */
   this.exportNode = function exportNode() {
     return { // export object to be JSONified for storage

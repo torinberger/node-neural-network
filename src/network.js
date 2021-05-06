@@ -90,7 +90,7 @@ const Network = function Network() {
     for (let i = 0; i < newNetwork.hiddenLayers.length; i += 1) {
       this.hiddenLayers[i] = new HiddenLayer();
       if (i === 0) {
-        const nOfNodesInPreviousLayer = newNetwork.inputLayer.nOfInputs;
+        const nOfNodesInPreviousLayer = newNetwork.inputLayer.inputNodes.length;
         this.hiddenLayers[i].importLayer(newNetwork.hiddenLayers[i], nOfNodesInPreviousLayer);
       } else {
         const nOfNodesInPreviousLayer = newNetwork.hiddenLayers[i - 1].nodes.length;

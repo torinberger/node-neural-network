@@ -1,3 +1,5 @@
+const InputNode = require('./inputNode');
+
 /**
  * Input Layer Constructor
  * Holds input nodes aswell as propagation functions.
@@ -10,7 +12,7 @@
  * @method exportLayer()
  */
 const InputLayer = function InputLayer() {
-  this.nOfInputs = undefined;
+  this.inputNodes = undefined;
 
   /**
    * Initialization
@@ -21,7 +23,12 @@ const InputLayer = function InputLayer() {
    * @return {InputLayer}
    */
   this.init = function init(nOfInputs) {
-    this.nOfInputs = nOfInputs; // set number of inputs
+    this.inputNodes = [];
+    for (let i = 0; i < nOfInputs; i += 1) {
+      this.inputNodes[i] = new InputNode();
+      this.inputNodes[i].init();
+    }
+
     return this;
   };
 
@@ -34,10 +41,15 @@ const InputLayer = function InputLayer() {
    * @return {Number[]}
    */
   this.forwardPropagate = function forwardPropagate(inputs) {
-    if (inputs.length !== this.nOfInputs) {
+    if (inputs.length !== this.inputNodes.length) {
       throw new Error('Incorrect input length');
     } else {
-      return inputs; // return inputs as outputs
+      const inputNodeOutputs = [];
+      for (let i = 0; i < this.inputNodes.length; i += 1) {
+        inputNodeOutputs[i] = this.inputNodes[i].forwardPropagate(inputs[i]);
+      }
+
+      return inputNodeOutputs;
     }
   };
 
@@ -50,18 +62,28 @@ const InputLayer = function InputLayer() {
    * @return {undefined}
    */
   this.importLayer = function importLayer(newInputLayer) {
-    this.nOfInputs = newInputLayer.nOfInputs;
+    this.inputNodes = [];
+    for (let i = 0; i < newInputLayer.inputNodes.length; i += 1) {
+      this.inputNodes[i] = new InputNode();
+      this.inputNodes[i].importNode();
+    }
   };
 
   /**
    * Export Layer
-   * Converts input layer to JSON string containing all node properties.
+   * Converts input layer to JSON object containing all node properties.
    *
-   * @return {string}
+   * @return {object}
    */
   this.exportLayer = function exportLayer() {
+    const nodesToExport = [];
+    for (let i = 0; i < this.inputNodes.length; i += 1) {
+      // export each node and store
+      nodesToExport.push(this.inputNodes[i].exportNode());
+    }
+
     return {
-      nOfInputs: this.nOfInputs,
+      inputNodes: nodesToExport,
     };
   };
 
@@ -69,5 +91,3 @@ const InputLayer = function InputLayer() {
 };
 
 module.exports = InputLayer;
-
-// TODO: create input node and integrate

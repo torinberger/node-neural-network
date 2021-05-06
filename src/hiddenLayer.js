@@ -69,9 +69,9 @@ const HiddenLayer = function HiddenLayer() {
 
   /**
    * Export Layer
-   * Converts input layer to JSON string containing all node properties.
+   * Converts input layer to JSON object containing all node properties.
    *
-   * @return {string}
+   * @return {object}
    */
   this.exportLayer = function exportLayer() {
     const nodesToExport = [];
