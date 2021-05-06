@@ -1,5 +1,6 @@
 const InputLayer = require('./inputLayer');
 const HiddenLayer = require('./hiddenLayer');
+const OutputLayer = require('./outputLayer');
 
 /**
  * Network constructor
@@ -45,7 +46,7 @@ const Network = function Network() {
     }
 
     // create output layer as another hidden layer
-    this.outputLayer = new HiddenLayer();
+    this.outputLayer = new OutputLayer();
     this.outputLayer.init(nOfOutputs, nOfHiddenLayerNodes.last());
 
     return this;
@@ -99,7 +100,7 @@ const Network = function Network() {
     }
 
     const nOfNodesInPreviousLayer = newNetwork.hiddenLayers.last().nodes.length;
-    this.outputLayer = new HiddenLayer();
+    this.outputLayer = new OutputLayer();
     this.outputLayer.importLayer(newNetwork.outputLayer, nOfNodesInPreviousLayer);
   };
 

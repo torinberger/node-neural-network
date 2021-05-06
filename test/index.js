@@ -31,7 +31,7 @@ describe('Network', () => {
       done();
     });
     it('it have the correct amount of outputs', (done) => {
-      nn.outputLayer.nodes.should.be.of.length(1);
+      nn.outputLayer.outputNodes.should.be.of.length(1);
       done();
     });
   });
