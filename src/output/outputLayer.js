@@ -35,7 +35,7 @@ const OutputLayer = function OutputLayer() {
 
   /**
    * Forward Propagate
-   * Propagates inputs through layer to generate outputs;
+   * Propagates inputs through layer to generate outputs.
    *
    * @param {Number[]} inputs
    *

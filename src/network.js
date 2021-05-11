@@ -1,3 +1,5 @@
+const Mathjs = require('mathjs');
+
 const InputLayer = require('./input/inputLayer');
 const HiddenLayer = require('./hidden/hiddenLayer');
 const OutputLayer = require('./output/outputLayer');
@@ -25,7 +27,7 @@ const Network = function Network() {
    * Instantiates network and generates layers.
    *
    * @param {Number} nOfInputs
-   * @param {Number} nOfHiddenLayerNodes
+   * @param {Number[]} nOfHiddenLayerNodes
    * @param {Number} nOfOutputs
    *
    * @return {Network}
@@ -73,6 +75,26 @@ const Network = function Network() {
     }
 
     return this.outputLayer.forwardPropagate(lastLayerValues);
+  };
+
+  /**
+   * Determine Cost
+   * Determines the cost of the neural network from expected outputs.
+   *
+   * @param {Number[][]} trainingInputs
+   * @param {Number[][]} expectedOutputs
+   *
+   * @return {Number}
+   */
+  this.determineCost = function determineCost(trainingInputs, expectedOutputs) {
+    const nOfTrainingRounds = trainingInputs.length;
+    const costs = [];
+    for (let i = 0; i < nOfTrainingRounds; i += 1) {
+      const output = this.forwardPropagate(trainingInputs[i]);
+      costs[i] = Mathjs.sum(Mathjs.square(Mathjs.subtract(output, expectedOutputs[i])));
+    }
+
+    return Mathjs.mean(costs);
   };
 
   /**

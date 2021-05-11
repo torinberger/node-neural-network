@@ -1,6 +1,8 @@
 const Mathjs = require('mathjs');
 const netUtil = require('../netUtil');
 
+const BIASSTRENGTH = 10;
+
 /**
  * Node Constructor
  * Holds weights, bias and propagation functions.
@@ -27,7 +29,7 @@ const Node = function Node() {
    */
   this.init = function init(nOfNodesInPreviousLayer) {
     this.weights = [];
-    this.bias = netUtil.randomWeight();
+    this.bias = netUtil.randomWeight() * BIASSTRENGTH;
     // create weight for each node in previous layer
     for (let i = 0; i < nOfNodesInPreviousLayer; i += 1) {
       this.weights[i] = netUtil.randomWeight();
