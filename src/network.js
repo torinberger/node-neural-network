@@ -78,7 +78,7 @@ const Network = function Network() {
   };
 
   /**
-   * Determine Cost
+   * Determine Network Cost
    * Determines the cost of the neural network from expected outputs.
    *
    * @param {Number[][]} trainingInputs
@@ -86,7 +86,7 @@ const Network = function Network() {
    *
    * @return {Number}
    */
-  this.determineCost = function determineCost(trainingInputs, expectedOutputs) {
+  this.determineNetworkCost = function determineCost(trainingInputs, expectedOutputs) {
     const nOfTrainingRounds = trainingInputs.length;
     const costs = [];
     for (let i = 0; i < nOfTrainingRounds; i += 1) {
@@ -95,6 +95,22 @@ const Network = function Network() {
     }
 
     return Mathjs.mean(costs);
+  };
+
+  /**
+   * Determine Output Costs
+   * Determines the cost of the output nodes from expected outputs.
+   *
+   * @param {Number[]} trainingInput
+   * @param {Number[]} expectedOutput
+   *
+   * @return {Number[]}
+   */
+  this.determineOutputCosts = function determineCost(trainingInput, expectedOutput) {
+    const output = this.forwardPropagate(trainingInput);
+    const costs = Mathjs.square(Mathjs.subtract(output, expectedOutput));
+
+    return costs;
   };
 
   /**
