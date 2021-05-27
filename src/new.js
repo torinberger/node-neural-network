@@ -23,10 +23,14 @@ class Network {
     for (let i = 0; i < nOfLayers + 1; i++) {
       this.weights[i] = [];
       this.biases[i] = [];
-      let nOfNodesInPreviousLayer = i === 0 ? nOfInputs : nOfNodesInLayers[i - 1];
-      for (let k = 0; k < nOfNodesInPreviousLayer; k++) {
-        this.weights[i][k] = randomWeight();
-        this.biases[i][k] = randomWeight();
+      let nOfNodesInLayer = i === nOfLayers ? nOfOutputs : nOfNodesInLayers[i];
+      for (let n = 0; n < nOfNodesInLayer; n++) {
+        this.weights[i][n] = [];
+        this.biases[i][n] = randomWeight();
+        let nOfNodesInPreviousLayer = i === 0 ? nOfInputs : nOfNodesInLayers[i - 1];
+        for (let k = 0; k < nOfNodesInPreviousLayer; k++) {
+          this.weights[i][n][k] = randomWeight();
+        }
       }
     }
   }
@@ -36,12 +40,11 @@ class Network {
 
     this.zs = [];
     this.as = [];
-    for (let i = 0; i < this.nOfLayers; i++) {
+    for (let i = 0; i < this.nOfLayers + 1; i++) {
       let lastLayerValues = i === 0 ? inputs : this.as[i - 1];
-      console.log(this.weights[i], lastLayerValues, this.biases[i]);
       let zs = Mathjs.add(Mathjs.multiply(this.weights[i], lastLayerValues), this.biases[i]);
-      this.zs.push(zs);
       let as = Array.from(zs, (x) => sigmoid(x));
+      this.zs.push(zs);
       this.as.push(as);
     }
 
