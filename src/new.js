@@ -4,6 +4,10 @@ function sigmoid(t) {
   return 1 / (1 + Math.E ** (-t));
 }
 
+function sigmoidDerivative(t) {
+  return sigmoid(t) * (1 - sigmoid(t));
+}
+
 function randomWeight() {
   return Math.random() * (1 - (-1)) + -1;
 }
@@ -49,6 +53,27 @@ class Network {
     }
 
     return this.as[this.as.length - 1];
+  }
+
+  backPropagate(inputs, expectedOutputs) {
+    if (inputs.length !== this.nOfInputs) { throw 'Incorrect input length'; }
+    if (expectedOutputs.length !== this.nOfOutputs) { throw 'Incorrect output length'; }
+
+    let propagation = this.forwardPropagate(inputs);
+    let cost = Mathjs.sum(Mathjs.square(Mathjs.subtract(propagation, expectedOutputs))) / propagation.length;
+
+    for (let layer = this.nOfLayers; layer > -1; layer--) {
+      let nOfNodesInLayer = layer === this.nOfLayers ? this.nOfOutputs : this.nOfNodesInLayers[layer];
+      for (let node = 0; node < nOfNodesInLayer; node++) {
+        for (let weight = 0; weight < this.weights[layer][node].length; weight++) {
+          this.weights[layer][node][weight];
+          let previousLayerNodeActivation = this.as[layer - 1][weight];
+          let sigmoidDerivativeOfZ = sigmoidDerivative(this.zs[layer][node]);
+          let costDerivative = 2 * (Mathjs.subtract(propagation[node], expectedOutputs[node]))
+          let costWithRespectToWeight = ;
+        }
+      }
+    }
   }
 }
 
