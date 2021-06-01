@@ -13,21 +13,25 @@ function randomWeight() {
 }
 
 class Network {
-  constructor(nOfInputs, nOfLayers, nOfNodesInLayers, nOfOutputs) {
+  constructor(nOfInputs, nOfNodesInLayers, nOfOutputs) {
+    console.log(nOfInputs, nOfNodesInLayers, nOfOutputs);
     this.nOfInputs = nOfInputs;
-    this.nOfLayers = nOfLayers;
+    this.nOfLayers = nOfNodesInLayers.push(nOfOutputs); // add number of outputs to array of number of nodes in layer
     this.nOfNodesInLayers = nOfNodesInLayers;
     this.nOfOutputs = nOfOutputs;
 
     this.zs = [];
     this.as = [];
-
     this.weights = [];
     this.biases = [];
-    for (let i = 0; i < nOfLayers + 1; i++) {
+    this.deltaWeights = [];
+    this.deltaBiases = [];
+    this.deltaActivations = [];
+
+    for (let i = 0; i < this.nOfLayers + 1; i++) {
       this.weights[i] = [];
       this.biases[i] = [];
-      let nOfNodesInLayer = i === nOfLayers ? nOfOutputs : nOfNodesInLayers[i];
+      let nOfNodesInLayer = i === this.nOfLayers ? nOfOutputs : nOfNodesInLayers[i];
       for (let n = 0; n < nOfNodesInLayer; n++) {
         this.weights[i][n] = [];
         this.biases[i][n] = randomWeight();
@@ -59,20 +63,37 @@ class Network {
     if (inputs.length !== this.nOfInputs) { throw 'Incorrect input length'; }
     if (expectedOutputs.length !== this.nOfOutputs) { throw 'Incorrect output length'; }
 
-    let propagation = this.forwardPropagate(inputs);
-    let cost = Mathjs.sum(Mathjs.square(Mathjs.subtract(propagation, expectedOutputs))) / propagation.length;
+    this.deltaWeights = [];
+    this.deltaBiases = [];
+    this.deltaActivations = [];
 
-    for (let layer = this.nOfLayers; layer > -1; layer--) {
-      let nOfNodesInLayer = layer === this.nOfLayers ? this.nOfOutputs : this.nOfNodesInLayers[layer];
-      for (let node = 0; node < nOfNodesInLayer; node++) {
-        for (let weight = 0; weight < this.weights[layer][node].length; weight++) {
-          this.weights[layer][node][weight];
-          let previousLayerNodeActivation = this.as[layer - 1][weight];
-          let sigmoidDerivativeOfZ = sigmoidDerivative(this.zs[layer][node]);
-          let costDerivative = 2 * (Mathjs.subtract(propagation[node], expectedOutputs[node]))
-          let costWithRespectToWeight = ;
+    let propagation = this.forwardPropagate(inputs);
+
+    for (let layer = this.nOfLayers - 1; layer > -1; layer--) {
+      console.log('loop layer', layer, 'with', this.nOfNodesInLayers[layer], 'nodes');
+      this.deltaWeights[layer] = [];
+      this.deltaBiases[layer] = [];
+      this.deltaActivations[layer] = [];
+
+      if (layer !== this.nOfLayers - 1) {
+        for (let nextLayerNode = 0; nextLayerNode < this.nOfNodesInLayers[layer - 1]; nextLayerNode++) {
+          this.deltaActivations[layer - 1][nextLayerNode] = 0;
+          for (let currentNode = 0; currentNode < this.nOfNodesInLayers[layer]; currentNode++) {
+            let weight = this.weights[layer][currentNode][nextLayerNode];
+            let sigmoidDerivativeOfZ = sigmoidDerivative(this.zs[layer][currentNode]);
+            let costDerivative;
+            if (layer === this.nOfLayers - 1) {
+              costDerivative = 2 * (propagation[currentNode] - expectedOutputs[currentNode]);
+            } else {
+              costDerivative = this.deltaActivations[layer][currentNode];
+            }
+            this.deltaActivations[layer - 1][nextLayerNode] += weight * sigmoidDerivativeOfZ * costDerivative;
+          }
         }
+      } else {
+        // nothing
       }
+
     }
   }
 }
