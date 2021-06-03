@@ -69,10 +69,10 @@ class Network {
       let nOfNodesInLayer = i === this.nOfLayers ? this.nOfOutputs : this.nOfNodesInLayers[i];
       for (let n = 0; n < nOfNodesInLayer; n++) {
         this.biases[i][n] -= this.deltaBiases[i][n] * trainingWeight;
-        console.log('changing bias', this.biases[i][n], 'by', this.deltaBiases[i][n]);
+        // console.log('changing bias', this.biases[i][n], 'by', this.deltaBiases[i][n]);
         let nOfNodesInPreviousLayer = i === 0 ? this.nOfInputs : this.nOfNodesInLayers[i - 1];
         for (let k = 0; k < nOfNodesInPreviousLayer; k++) {
-          console.log('changing weight', this.weights[i][n][k], 'by', this.deltaWeights[i][n][k]);
+          // console.log('changing weight', this.weights[i][n][k], 'by', this.deltaWeights[i][n][k]);
           this.weights[i][n][k] -= this.deltaWeights[i][n][k] * trainingWeight;
         }
       }
